@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="appIcon" type="id"/>
+    <item name="tv_app_name_title" type="id"/>
+    <item name="tv_app_name" type="id"/>
+    <item name="separator" type="id"/>
+    <item name="tv_limit_label" type="id"/>
+    <item name="tv_current_limit" type="id"/>
+    <item name="time_limit_seekbar" type="id"/>
+    <item name="tv_min_value" type="id"/>
+    <item name="tv_max_value" type="id"/>
+    <item name="btn_save_limit" type="id"/>
+</resources>

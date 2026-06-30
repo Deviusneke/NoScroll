@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <solid android:color="#6200EE"/> <!-- Cor do botão -->
+    <size
+        android:width="80dp"
+        android:height="80dp"/> <!-- Tamanho fixo do botão -->
+
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF"/> <!-- Borda opcional -->
+</shape>

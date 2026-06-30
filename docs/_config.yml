@@ -1,0 +1,6 @@
+title: NoSCRoll
+description: Retome o controle do seu tempo de tela
+theme: null
+
+# Disable Jekyll processing - serve raw HTML
+plugins: []

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">NoSCroll</string>
+    <string name="logo">logo</string>
+    <string name="bem_vindo_de_volta">Bem vindo de volta</string>
+    <string name="e_mail">E-mail</string>
+    <string name="senha">Senha</string>
+    <string name="lembrar_me">Lembrar-me</string>
+    <string name="esqueci_a_senha">Esqueci a senha</string>
+    <string name="entrar">Entrar</string>
+    <string name="cadastre_se">Cadastre-se</string>
+    <string name="NoScroll">NoScroll</string>
+    <string name="metas">Metas:</string>
+    <string name="configurar_limite_de_tempo_para">Configurar Limite de Tempo para:</string>
+    <string name="salvar_limite_de_tempo">Salvar Limite de Tempo</string>
+    <string name="aplicativos">Aplicativos</string>
+</resources>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".CriarMetaActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/partial_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Título da Página -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Criar Nova Meta"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Campo Descrição da Meta -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescricaoMeta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Descreva sua meta..."
+                android:inputType="textMultiLine"
+                android:minLines="4"
+                android:maxLines="6"
+                android:gravity="top" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Nível da Meta -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nível de Dificuldade"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupNivel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:orientation="vertical">
+
+            <!-- CORREÇÃO: RadioButton FÁCIL diretamente no RadioGroup -->
+            <RadioButton
+                android:id="@+id/radioFacil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fácil"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackground" />
+
+            <!-- CORREÇÃO: RadioButton MÉDIO diretamente no RadioGroup -->
+            <RadioButton
+                android:id="@+id/radioMedio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Médio"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackground" />
+
+            <!-- CORREÇÃO: RadioButton DIFÍCIL diretamente no RadioGroup -->
+            <RadioButton
+                android:id="@+id/radioDificil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Difícil"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackground" />
+
+        </RadioGroup>
+
+        <!-- Botão Criar Meta -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCriarMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Criar Meta"
+            android:textSize="16sp"
+            app:cornerRadius="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Botão Voltar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVoltar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Voltar"
+            android:textSize="16sp"
+            app:cornerRadius="8dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

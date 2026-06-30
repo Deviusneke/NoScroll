@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Slate/Charcoal Colors -->
+    <color name="slate_950">#020617</color> <!-- Status Bar -->
+    <color name="slate_900">#0F172A</color> <!-- Background -->
+    <color name="slate_800">#1E293B</color> <!-- Surface / Cards -->
+    <color name="slate_700">#334155</color> <!-- Primary Dark / Variant -->
+    <color name="slate_400">#94A3B8</color> <!-- Primary Accent -->
+    <color name="slate_200">#E2E8F0</color> <!-- Text Data -->
+
+    <!-- Sky / Accent colors to add some spice -->
+    <color name="sky_500">#0EA5E9</color>
+    
+    <!-- Utilities -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white_transparent">#0DFFFFFF</color>
+    <color name="red_error">#EF4444</color>
+
+    <!-- Legacy mapped colors so app doesn't crash if they are referenced somewhere -->
+    <color name="purple_200">#0F172A</color>
+    <color name="purple_500">#1E293B</color>
+    <color name="purple_700">#020617</color>
+    <color name="teal_200">#0EA5E9</color>
+    <color name="teal_700">#0284C7</color>
+    <color name="colorPrimary">#94A3B8</color>
+    <color name="colorPrimaryDark">#020617</color>
+    <color name="colorAccent">#0EA5E9</color>
+    <color name="gray">#FF808080</color>
+</resources>

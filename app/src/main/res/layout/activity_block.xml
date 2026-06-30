@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#DD000000"
+    android:padding="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center"
+        android:background="#FFFFFF"
+        android:elevation="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🚫"
+            android:textSize="64dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/tvBlockMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Limite de tempo excedido!"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="#D32F2F"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvBlockTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="App bloqueado"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
+
+        <Button
+            android:id="@+id/btnCloseBlock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:backgroundTint="#D32F2F" />
+
+    </LinearLayout>
+
+</LinearLayout>

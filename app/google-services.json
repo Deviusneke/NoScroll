@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900757020902",
+    "project_id": "no-scroll-8dcec",
+    "storage_bucket": "no-scroll-8dcec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900757020902:android:3bb9c34f443006cbaa9b27",
+        "android_client_info": {
+          "package_name": "com.example.noscroll"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpreAUIIR8B0DCvFfGQrzp4FhcyMhupr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

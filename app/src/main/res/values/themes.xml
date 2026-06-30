@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema Principal do App: Charcoal Dark Slate -->
+    <style name="Theme.NoScroll" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Main colors -->
+        <item name="colorPrimary">@color/sky_500</item> 
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/slate_800</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorSecondary">@color/slate_400</item>
+        
+        <!-- Background colors -->
+        <item name="android:windowBackground">@color/slate_900</item>
+        <item name="android:colorBackground">@color/slate_900</item>
+        
+        <!-- Surface (Cards, overlays) -->
+        <item name="colorSurface">@color/slate_800</item>
+        <item name="colorOnSurface">@color/white</item>
+
+        <!-- Elementos Interativos -->
+        <item name="colorAccent">@color/sky_500</item>
+
+        <!-- Status bar and Navigation bar -->
+        <item name="android:statusBarColor">@color/slate_950</item>
+        <item name="android:navigationBarColor">@color/slate_950</item>
+    </style>
+</resources>

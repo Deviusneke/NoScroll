@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoSCRoll – Retome o controle do seu tempo de tela</title>
+  <meta name="description" content="NoSCRoll é um aplicativo Android de bem-estar digital que ajuda você a monitorar, limitar e reduzir o tempo gasto em aplicativos com gamificação por XP e metas." />
+  <meta name="keywords" content="NoSCRoll, Android, bem-estar digital, screen time, controle de uso, bloqueio de apps, Kotlin, Firebase" />
+  <meta property="og:title" content="NoSCRoll – Retome o controle do seu tempo de tela" />
+  <meta property="og:description" content="Monitore, limite e reduza o tempo gasto em apps com gamificação por XP e metas." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple-950: #0d0618;
+      --purple-900: #1a0533;
+      --purple-800: #2d0d54;
+      --purple-700: #4a1570;
+      --purple-600: #6d28a0;
+      --purple-500: #7c3aed;
+      --purple-400: #a855f7;
+      --purple-300: #c084fc;
+      --purple-200: #d8b4fe;
+      --purple-100: #ede9fe;
+      --violet:     #8b5cf6;
+      --pink:       #ec4899;
+      --cyan:       #06b6d4;
+      --green:      #10b981;
+      --yellow:     #f59e0b;
+      --red:        #ef4444;
+      --white:      #ffffff;
+      --text-muted: #a1a1aa;
+      --glass-bg:   rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --glow: 0 0 40px rgba(124,58,237,0.35);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--purple-950);
+      color: var(--white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── BACKGROUND BLOBS ── */
+    .bg-orbs {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width:600px; height:600px; background:var(--purple-500); top:-200px; left:-150px; animation-duration:14s; }
+    .orb-2 { width:500px; height:500px; background:var(--violet); bottom:-100px; right:-100px; animation-duration:10s; }
+    .orb-3 { width:350px; height:350px; background:var(--pink); top:40%; left:40%; opacity:0.10; animation-duration:18s; }
+
+    @keyframes drift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(40px,30px) scale(1.05); }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      backdrop-filter: blur(24px);
+      background: rgba(13, 6, 24, 0.75);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 2rem;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 1.25rem; font-weight: 800; color: var(--white);
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo .shield { font-size: 1.5rem; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--purple-300); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple-500), var(--violet));
+      color: var(--white) !important;
+      padding: 0.45rem 1.2rem; border-radius: 999px; font-weight: 600 !important;
+      transition: opacity 0.2s, transform 0.2s !important;
+      box-shadow: 0 0 20px rgba(124,58,237,0.4);
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); color: var(--white) !important; }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 8rem 2rem 5rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.35);
+      padding: 0.35rem 1rem; border-radius: 999px;
+      font-size: 0.8rem; color: var(--purple-300); font-weight: 600;
+      margin-bottom: 2rem; animation: fadeUp 0.6s ease both;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .hero-badge .dot { width:7px; height:7px; background:var(--green); border-radius:50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.6)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+
+    .hero-icon {
+      font-size: 5rem; margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+      filter: drop-shadow(0 0 30px rgba(124,58,237,0.6));
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900; letter-spacing: -2px; line-height: 1.05;
+      animation: fadeUp 0.6s 0.15s ease both;
+      background: linear-gradient(135deg, var(--white) 30%, var(--purple-300));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 1.25rem; color: var(--text-muted); max-width: 600px;
+      margin: 1.25rem auto 0; font-weight: 400;
+      animation: fadeUp 0.6s 0.25s ease both;
+    }
+    .hero-buttons {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      margin-top: 2.5rem; animation: fadeUp 0.6s 0.35s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--purple-500), var(--violet));
+      color: var(--white); text-decoration: none; font-weight: 700;
+      padding: 0.85rem 2rem; border-radius: 999px; font-size: 1rem;
+      box-shadow: 0 0 30px rgba(124,58,237,0.5), 0 4px 20px rgba(0,0,0,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(124,58,237,0.7), 0 8px 30px rgba(0,0,0,0.4); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      color: var(--white); text-decoration: none; font-weight: 600;
+      padding: 0.85rem 2rem; border-radius: 999px; font-size: 1rem;
+      backdrop-filter: blur(10px); transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--purple-500); transform: translateY(-2px); }
+
+    .hero-badges-stack {
+      display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;
+      margin-top: 2.5rem; animation: fadeUp 0.6s 0.45s ease both;
+    }
+    .tech-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      padding: 0.35rem 0.9rem; border-radius: 999px;
+      font-size: 0.78rem; color: var(--text-muted); font-weight: 500;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: var(--text-muted); font-size: 0.75rem; animation: bounce 2s infinite;
+    }
+    .scroll-hint span { font-size: 1.2rem; }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+    /* ── SECTION WRAPPER ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    .section-label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--purple-400); font-weight: 700; margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -1px;
+    }
+    .section-desc {
+      color: var(--text-muted); max-width: 560px; margin-top: 0.75rem; font-size: 1.05rem;
+    }
+    .section-pad { padding: 6rem 0; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); margin: 0 2rem; }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem; margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 1.75rem;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,58,237,0.06), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-4px); box-shadow: var(--glow); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display: flex; flex-direction: column; gap: 0; margin-top: 3rem; position: relative; }
+    .steps::before {
+      content: ''; position: absolute; left: 24px; top: 32px; bottom: 32px;
+      width: 2px; background: linear-gradient(to bottom, var(--purple-500), transparent);
+    }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      padding: 1.5rem; border-radius: 16px; transition: background 0.2s;
+      position: relative;
+    }
+    .step:hover { background: var(--glass-bg); }
+    .step-num {
+      width: 48px; height: 48px; min-width: 48px;
+      background: linear-gradient(135deg, var(--purple-500), var(--violet));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; z-index: 1;
+      box-shadow: 0 0 20px rgba(124,58,237,0.4);
+    }
+    .step-content h3 { font-weight: 700; margin-bottom: 0.4rem; }
+    .step-content p  { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+
+    /* ── XP TABLE ── */
+    .xp-table-wrap { margin-top: 3rem; }
+    .xp-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; margin-top: 1.5rem;
+    }
+    .xp-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 16px; padding: 1.5rem; text-align: center;
+      transition: transform 0.2s;
+    }
+    .xp-card:hover { transform: translateY(-3px); }
+    .xp-card .diff { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .xp-card .diff-label { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+    .xp-card .xp-val {
+      font-size: 2rem; font-weight: 900; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--purple-400), var(--pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .xp-card .xp-label { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ── TECH STACK ── */
+    .tech-table {
+      width: 100%; border-collapse: collapse; margin-top: 2rem;
+      background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px;
+      overflow: hidden;
+    }
+    .tech-table th {
+      text-align: left; padding: 1rem 1.5rem;
+      background: rgba(124,58,237,0.12); font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--purple-300);
+      font-weight: 700;
+    }
+    .tech-table td {
+      padding: 0.9rem 1.5rem; border-top: 1px solid var(--glass-border);
+      font-size: 0.9rem;
+    }
+    .tech-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .tech-table td:first-child { color: var(--text-muted); }
+    .tech-table td:nth-child(2) { font-weight: 600; }
+    .tech-table td:last-child {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--purple-300);
+    }
+
+    /* ── PERMISSIONS ── */
+    .permissions-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem; margin-top: 2.5rem;
+    }
+    .perm-card {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 1.25rem;
+    }
+    .perm-icon { font-size: 1.5rem; }
+    .perm-content .perm-name {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      color: var(--purple-300); display: block; margin-bottom: 0.25rem;
+    }
+    .perm-content p { font-size: 0.85rem; color: var(--text-muted); }
+    .perm-type-auto {
+      display: inline-block; margin-top: 0.4rem;
+      font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: 999px;
+      background: rgba(16,185,129,0.15); color: var(--green); font-weight: 600;
+    }
+    .perm-type-manual {
+      display: inline-block; margin-top: 0.4rem;
+      font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: 999px;
+      background: rgba(245,158,11,0.15); color: var(--yellow); font-weight: 600;
+    }
+
+    /* ── DOWNLOAD ── */
+    .download-section {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(139,92,246,0.08));
+      border: 1px solid rgba(124,58,237,0.25); border-radius: 28px;
+      padding: 4rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .download-section::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(124,58,237,0.2), transparent 70%);
+      border-radius: 50%;
+    }
+    .download-section h2 {
+      font-size: 2.25rem; font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 0.75rem;
+    }
+    .download-section p { color: var(--text-muted); max-width: 520px; margin: 0 auto 2rem; }
+    .download-options {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 2rem; border-radius: 16px; font-weight: 700; font-size: 1rem;
+      text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-download-primary {
+      background: linear-gradient(135deg, var(--purple-500), var(--violet));
+      color: var(--white); box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    }
+    .btn-download-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(124,58,237,0.6); }
+    .btn-download-ghost {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      color: var(--white); backdrop-filter: blur(10px);
+    }
+    .btn-download-ghost:hover { border-color: var(--purple-400); transform: translateY(-2px); }
+    .btn-download-content { text-align: left; }
+    .btn-download-content small { display: block; font-size: 0.7rem; font-weight: 400; opacity: 0.75; }
+    .note-box {
+      margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25);
+      padding: 0.5rem 1.25rem; border-radius: 999px;
+      font-size: 0.82rem; color: var(--yellow);
+    }
+
+    /* ── CONTRIBUTE ── */
+    .future-list {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem; margin-top: 2rem;
+    }
+    .future-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 0.9rem 1.2rem; font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .future-item::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--purple-500); min-width: 8px; }
+
+    .code-block {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--purple-200); line-height: 1.8; overflow-x: auto;
+    }
+    .code-block .comment { color: #6d7f8e; }
+    .code-block .cmd { color: var(--cyan); }
+    .code-block .arg { color: var(--purple-300); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--glass-border);
+      padding: 3rem 2rem 2rem;
+      text-align: center; color: var(--text-muted); font-size: 0.875rem;
+    }
+    footer .footer-logo {
+      font-size: 1.5rem; font-weight: 800; color: var(--white);
+      letter-spacing: -0.5px; margin-bottom: 0.5rem; display: block;
+    }
+    footer a { color: var(--purple-400); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .steps::before { display: none; }
+      .download-section { padding: 2.5rem 1.5rem; }
+      .download-section h2 { font-size: 1.75rem; }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Background blobs -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <span class="shield">🛡️</span> NoSCRoll
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Funcionalidades</a></li>
+      <li><a href="#how">Como Funciona</a></li>
+      <li><a href="#stack">Tecnologias</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="https://github.com/Devisneke/NoSCRoll" target="_blank" class="nav-cta" id="nav-github">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="hero-badge">
+      <span class="dot"></span>
+      Android · Kotlin · Firebase
+    </span>
+    <div class="hero-icon">🛡️</div>
+    <h1>NoSCRoll</h1>
+    <p class="hero-subtitle">
+      Retome o controle do seu tempo de tela. Monitore, limite e reduza o uso de aplicativos com gamificação por <strong>XP e metas</strong>.
+    </p>
+    <div class="hero-buttons">
+      <a href="#download" class="btn-primary" id="hero-download-btn">
+        ⬇️ Baixar APK
+      </a>
+      <a href="https://github.com/Devisneke/NoSCRoll" target="_blank" class="btn-secondary" id="hero-github-btn">
+        ⭐ Ver no GitHub
+      </a>
+    </div>
+    <div class="hero-badges-stack">
+      <span class="tech-badge">🤖 Android 7.0+</span>
+      <span class="tech-badge">🌐 Kotlin 1.9</span>
+      <span class="tech-badge">🔥 Firebase</span>
+      <span class="tech-badge">📊 MPAndroidChart</span>
+      <span class="tech-badge">🗄️ Room DB</span>
+      <span class="tech-badge">📄 MIT License</span>
+    </div>
+    <div class="scroll-hint">
+      <small>role para ver mais</small>
+      <span>↓</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <section class="section-pad" id="features">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">✨ Funcionalidades</p>
+        <h2 class="section-title">Tudo que você precisa para<br/>usar menos o celular</h2>
+        <p class="section-desc">NoSCRoll combina bloqueio inteligente, análise de dados e gamificação para criar hábitos saudáveis de forma sustentável.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal" id="feature-block">
+          <div class="feature-icon">🔒</div>
+          <h3>Bloqueio Inteligente</h3>
+          <p>Monitora o app em primeiro plano a cada <strong>2 segundos</strong>. Ao atingir o limite diário, exibe uma tela de bloqueio automática. Reset à meia-noite.</p>
+        </div>
+        <div class="feature-card reveal" id="feature-limits">
+          <div class="feature-icon">⏱️</div>
+          <h3>Limites por App</h3>
+          <p>Configure um tempo diário máximo para qualquer app instalado com precisão de horas e minutos. Remoção imediata com um clique.</p>
+        </div>
+        <div class="feature-card reveal" id="feature-dashboard">
+          <div class="feature-icon">📊</div>
+          <h3>Dashboard Semanal</h3>
+          <p>Gráfico de linha interativo com os últimos <strong>7 dias</strong> de uso. Visualize seu progresso e identifique padrões de comportamento.</p>
+        </div>
+        <div class="feature-card reveal" id="feature-gamification">
+          <div class="feature-icon">🎯</div>
+          <h3>Gamificação com XP</h3>
+          <p>Crie metas de redução de uso e ganhe XP ao concluí-las. Sistema de <strong>level up</strong> com progressão exponencial para manter a motivação.</p>
+        </div>
+        <div class="feature-card reveal" id="feature-auth">
+          <div class="feature-icon">👤</div>
+          <h3>Perfil na Nuvem</h3>
+          <p>Autenticação via <strong>Firebase Auth</strong>. Seus dados de XP, nível e metas ficam sincronizados no Firestore e seguros na nuvem.</p>
+        </div>
+        <div class="feature-card reveal" id="feature-self">
+          <div class="feature-icon">💪</div>
+          <h3>Self-Service</h3>
+          <p>Você define seus próprios limites — sem controle parental. Autonomia total para desenvolver autodisciplina digital de forma consciente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-pad" id="how">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">⚙️ Como Funciona</p>
+        <h2 class="section-title">Simples de usar,<br/>poderoso por dentro</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal" id="step-1">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Crie sua conta</h3>
+            <p>Cadastre-se com e-mail e senha. Seus dados de perfil, XP e metas ficam salvos com segurança no Firebase Firestore.</p>
+          </div>
+        </div>
+        <div class="step reveal" id="step-2">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Escolha os apps para monitorar</h3>
+            <p>Selecione qualquer app instalado no seu dispositivo e defina um limite diário com precisão de horas e minutos usando pickers interativos.</p>
+          </div>
+        </div>
+        <div class="step reveal" id="step-3">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>O serviço monitora em background</h3>
+            <p>Um ForegroundService verifica a cada 2 segundos qual app está ativo. Ao atingir seu limite, uma tela de bloqueio é exibida automaticamente sobre o app.</p>
+          </div>
+        </div>
+        <div class="step reveal" id="step-4">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h3>Acompanhe seu progresso</h3>
+            <p>Visualize seu uso semanal no gráfico do dashboard. Crie metas, complete-as e ganhe XP para subir de nível — mantendo-se motivado a cada dia.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP System -->
+      <div class="xp-table-wrap reveal" id="xp-section">
+        <p class="section-label" style="margin-top:3rem">🎮 Sistema de XP</p>
+        <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem">Ganhe XP completando metas</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem">O XP necessário para subir de nível aumenta 15% a cada nível.</p>
+        <div class="xp-cards">
+          <div class="xp-card" id="xp-easy">
+            <div class="diff">🟢</div>
+            <div class="diff-label">Fácil</div>
+            <div class="xp-val">+15</div>
+            <div class="xp-label">XP por meta</div>
+          </div>
+          <div class="xp-card" id="xp-medium">
+            <div class="diff">🟡</div>
+            <div class="diff-label">Médio</div>
+            <div class="xp-val">+30</div>
+            <div class="xp-label">XP por meta</div>
+          </div>
+          <div class="xp-card" id="xp-hard">
+            <div class="diff">🔴</div>
+            <div class="diff-label">Difícil</div>
+            <div class="xp-val">+50</div>
+            <div class="xp-label">XP por meta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TECH STACK -->
+  <section class="section-pad" id="stack">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">🛠️ Tecnologias</p>
+        <h2 class="section-title">Stack Moderno e Robusto</h2>
+        <p class="section-desc">Construído com as melhores tecnologias do ecossistema Android.</p>
+      </div>
+      <div class="reveal">
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>Categoria</th>
+              <th>Tecnologia</th>
+              <th>Versão</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Linguagem</td><td>Kotlin</td><td>1.9.22</td></tr>
+            <tr><td>UI</td><td>Android Views + Material Design 3</td><td>1.11.0</td></tr>
+            <tr><td>Gráficos</td><td>MPAndroidChart</td><td>3.1.0</td></tr>
+            <tr><td>Banco Local</td><td>Room (SQLite)</td><td>2.6.1</td></tr>
+            <tr><td>Autenticação</td><td>Firebase Authentication</td><td>22.3.1</td></tr>
+            <tr><td>Banco em Nuvem</td><td>Firebase Firestore</td><td>24.10.1</td></tr>
+            <tr><td>Async</td><td>Kotlin Coroutines</td><td>1.7.3</td></tr>
+            <tr><td>Build</td><td>Gradle Kotlin DSL</td><td>8.13.1</td></tr>
+            <tr><td>Min SDK</td><td>Android 7.0 (Nougat)</td><td>API 24</td></tr>
+            <tr><td>Target SDK</td><td>Android 14</td><td>API 34</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Permissions -->
+      <div class="reveal" style="margin-top:3.5rem" id="permissions-section">
+        <p class="section-label">🔐 Permissões Necessárias</p>
+        <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:0.25rem">Transparência total</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0">Na primeira execução, o app guia você para conceder as permissões necessárias.</p>
+        <div class="permissions-grid" style="margin-top:1.5rem">
+          <div class="perm-card" id="perm-usage">
+            <div class="perm-icon">📊</div>
+            <div class="perm-content">
+              <span class="perm-name">PACKAGE_USAGE_STATS</span>
+              <p>Lê as estatísticas de uso dos apps para monitorar o tempo.</p>
+              <span class="perm-type-manual">⚠️ Manual</span>
+            </div>
+          </div>
+          <div class="perm-card" id="perm-overlay">
+            <div class="perm-icon">🪟</div>
+            <div class="perm-content">
+              <span class="perm-name">SYSTEM_ALERT_WINDOW</span>
+              <p>Exibe a tela de bloqueio sobre outros apps quando o limite é atingido.</p>
+              <span class="perm-type-manual">⚠️ Manual</span>
+            </div>
+          </div>
+          <div class="perm-card" id="perm-service">
+            <div class="perm-icon">🔄</div>
+            <div class="perm-content">
+              <span class="perm-name">FOREGROUND_SERVICE</span>
+              <p>Mantém o serviço de monitoramento ativo em segundo plano.</p>
+              <span class="perm-type-auto">✅ Automática</span>
+            </div>
+          </div>
+          <div class="perm-card" id="perm-notif">
+            <div class="perm-icon">🔔</div>
+            <div class="perm-content">
+              <span class="perm-name">POST_NOTIFICATIONS</span>
+              <p>Notificação persistente do serviço de monitoramento (Android 13+).</p>
+              <span class="perm-type-auto">✅ Automática</span>
+            </div>
+          </div>
+          <div class="perm-card" id="perm-net">
+            <div class="perm-icon">🌐</div>
+            <div class="perm-content">
+              <span class="perm-name">INTERNET</span>
+              <p>Comunicação com o Firebase para autenticação e sincronização de dados.</p>
+              <span class="perm-type-auto">✅ Automática</span>
+            </div>
+          </div>
+          <div class="perm-card" id="perm-wake">
+            <div class="perm-icon">⚡</div>
+            <div class="perm-content">
+              <span class="perm-name">WAKE_LOCK</span>
+              <p>Mantém o serviço ativo mesmo quando a tela do dispositivo está apagada.</p>
+              <span class="perm-type-auto">✅ Automática</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- DOWNLOAD -->
+  <section class="section-pad" id="download">
+    <div class="container">
+      <div class="download-section reveal">
+        <p class="section-label" style="text-align:center">📦 Obter o App</p>
+        <h2>Pronto para começar?</h2>
+        <p>
+          NoSCRoll é um projeto open-source desenvolvido com Kotlin + Firebase.
+          Faça o download do APK diretamente ou clone o repositório para compilar você mesmo.
+        </p>
+        <div class="download-options">
+          <a href="https://github.com/Devisneke/NoSCRoll/releases/latest" target="_blank"
+             class="btn-download btn-download-primary" id="download-apk-btn">
+            <span style="font-size:1.75rem">📱</span>
+            <span class="btn-download-content">
+              <strong>Download APK</strong>
+              <small>Android 7.0+ · Versão 1.0</small>
+            </span>
+          </a>
+          <a href="https://github.com/Devisneke/NoSCRoll" target="_blank"
+             class="btn-download btn-download-ghost" id="download-source-btn">
+            <span style="font-size:1.75rem">💻</span>
+            <span class="btn-download-content">
+              <strong>Código-Fonte</strong>
+              <small>Compilar no Android Studio</small>
+            </span>
+          </a>
+        </div>
+        <div class="note-box">
+          ⚠️ Requer Android 7.0 (API 24) ou superior. Recomenda-se dispositivo físico para monitoramento.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTRIBUTE -->
+  <section class="section-pad" id="contribute">
+    <div class="container">
+      <div class="reveal">
+        <p class="section-label">🤝 Contribua</p>
+        <h2 class="section-title">Projeto Open Source</h2>
+        <p class="section-desc">Contribuições são muito bem-vindas! Clone o projeto, crie sua branch e abra um Pull Request.</p>
+      </div>
+
+      <div class="code-block reveal" id="install-code">
+        <span class="comment"># 1. Clone o repositório</span><br/>
+        <span class="cmd">git</span> <span class="arg">clone https://github.com/Devisneke/NoSCRoll.git</span><br/><br/>
+        <span class="comment"># 2. Abra no Android Studio e configure o Firebase</span><br/>
+        <span class="comment"># Coloque o google-services.json em app/</span><br/><br/>
+        <span class="comment"># 3. Execute no dispositivo físico (API 24+)</span><br/>
+        <span class="cmd">./gradlew</span> <span class="arg">assembleDebug</span>
+      </div>
+
+      <div style="margin-top:3rem" class="reveal">
+        <p class="section-label">🚀 Próximas Funcionalidades</p>
+        <h3 style="font-size:1.4rem;font-weight:700;margin-bottom:0.25rem">Roadmap de melhorias</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem">Quer ajudar? Essas são algumas ideias para o futuro do projeto.</p>
+        <div class="future-list">
+          <div class="future-item" id="future-widget">Widget na tela inicial com resumo diário</div>
+          <div class="future-item" id="future-schedule">Modo de uso por horário (ex: bloquear após 22h)</div>
+          <div class="future-item" id="future-reports">Relatórios semanais via notificação</div>
+          <div class="future-item" id="future-api">Integração com Google Digital Wellbeing API</div>
+          <div class="future-item" id="future-profiles">Suporte a múltiplos perfis de usuário</div>
+          <div class="future-item" id="future-themes">Temas claro e escuro (Material You)</div>
+          <div class="future-item" id="future-pdf">Exportar relatório de uso em PDF</div>
+          <div class="future-item" id="future-compose">Migração completa para Jetpack Compose</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">🛡️ NoSCRoll</span>
+    <p>Feito com ❤️ para ajudar pessoas a usarem menos o celular e viverem mais o presente.</p>
+    <p style="margin-top:0.75rem">
+      <a href="https://github.com/Devisneke/NoSCRoll" target="_blank">GitHub</a> &nbsp;·&nbsp;
+      <a href="https://github.com/Devisneke/NoSCRoll/blob/main/LICENSE" target="_blank">Licença MIT</a> &nbsp;·&nbsp;
+      <a href="https://github.com/Devisneke/NoSCRoll/issues" target="_blank">Reportar Bug</a>
+    </p>
+    <p style="margin-top:1rem;font-size:0.75rem;opacity:0.5">v1.0 · Android 7.0+ · Kotlin + Firebase</p>
+  </footer>
+
+  <script>
+    // Scroll reveal animation
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 60);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Smooth active nav
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 100) current = sec.id;
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current
+          ? 'var(--purple-300)' : '';
+      });
+    });
+  </script>
+
+</body>
+</html>
